@@ -215,7 +215,7 @@ def evaluate(grid: Grid.Grid, player: Grid.Player) -> float:
     player_legal_moves = len(legals(grid, player))
     opponent_legal_moves = len(legals(grid, opponent))
 
-    return -score(Grid.grid_to_state(grid),player)*100 +opponent_legal_moves - player_legal_moves
+    return -score(Grid.grid_to_state(grid)) * 100 +opponent_legal_moves - player_legal_moves
 
 # Negamax
 def nega_max(state: Grid.State, player: Grid.Player, depth: int) -> float:
@@ -420,9 +420,9 @@ def main():
     """
     start = time.time()
     list_scores = []
-    for i in range(1):
+    for i in range(100):
         print("Partie:", i)
-        list_scores.append(game_play(4, strategy_nega_max_alpha_beta, strategy_random))
+        list_scores.append(game_play(4, strategy_straightforwardNega, strategy_random))
 
     print(time.time() - start)
     print(list_scores.count(1), "/", len(list_scores))
