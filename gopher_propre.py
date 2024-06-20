@@ -284,7 +284,7 @@ def strategy_nega_max(
     return env, best_action
 
 
-@memoize
+#@memoize
 def nega_max_alpha_beta(
     state: Grid.State, player: Grid.Player, depth: int, alpha: float, beta: float
 ) -> float:
@@ -335,7 +335,7 @@ def strategy_nega_max_alpha_beta(
     state: Grid.State,
     player: Grid.Player,
     _: Grid.Time,
-    depth: int = 5,
+    depth: int = 4,
 ) -> Tuple[Grid.Environment, Grid.ActionGopher]:
     """Negamax strategy with alpha-beta pruning for the player."""
     best_action=state[0][0]

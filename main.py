@@ -33,11 +33,14 @@ def strategy_brain(
         values: tuple[Environment, Action] = gopher_propre.strategy_nega_max_alpha_beta(
             env, state, player, time_left
         )
+        print("coup joué")
         return values
 
     values: tuple[Environment, Action] = dodo.strategy_nega_max_alpha_beta(
         env, state, player, time_left
     )
+    print("coup joué")
+
     return values
 
 def final_result(state: State, score: Score, player: Player):
@@ -53,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("group_id")
     parser.add_argument("members")
     parser.add_argument("password")
-    parser.add_argument("-s", "--server-url", default="http://lchappuis.fr:8081/")
+    parser.add_argument("-s", "--server-url", default="http://lchappuis.fr:8080/")
     parser.add_argument("-d", "--disable-dodo", action="store_true")
     parser.add_argument("-g", "--disable-gopher", action="store_true")
     args = parser.parse_args()

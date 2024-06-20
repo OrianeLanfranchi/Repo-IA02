@@ -2,10 +2,34 @@
 Module for Dodo game initialization and strategies.
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 import time
 import random
 import Grid
+
+def memoize(
+    f: Callable[
+        [Grid.State, Grid.Player, int, float, float],
+        Tuple[Grid.Score, Grid.ActionDodo],
+    ]
+) -> Callable[[Grid.State, Grid.Player, int], Tuple[Grid.Score, Grid.ActionDodo]]:
+    """Memoize function results to improve performance."""
+    cache = {}  # closure
+
+    def g(
+        state: Grid.State, player: Grid.Player, depth: int, alpha: float, beta: float
+    ):
+        state_tuple = Grid.state_to_tuple(state)
+        if state_tuple in cache:
+            return cache[state_tuple]
+
+        val = f(state, player, depth, alpha, beta)
+        cache[state_tuple] = val
+
+        return val
+
+    return g
+
 
 ### Initializing
 def init_grid(size: int) -> Grid.Grid:
@@ -190,7 +214,8 @@ def evaluate(grid: Grid.Grid, player: Grid.Player) -> float:
     opponent = player % 2 + 1
     player_legal_moves = len(legals(grid, player))
     opponent_legal_moves = len(legals(grid, opponent))
-    return opponent_legal_moves - player_legal_moves
+
+    return -score(Grid.grid_to_state(grid),player)*100 +opponent_legal_moves - player_legal_moves
 
 # Negamax
 def nega_max(state: Grid.State, player: Grid.Player, depth: int) -> float:
@@ -278,22 +303,24 @@ def nega_max_alpha_beta_action(
     for possible_action in list_actions:
         new_state = play(state, player, possible_action)
         eval_score = -nega_max_alpha_beta(
-            new_state, player % 2 + 1, depth - 1, alpha, beta
+            new_state, player % 2 + 1, depth - 1, -beta, -alpha  
         )
         if eval_score > best_score:
             best_score = eval_score
             best_action = possible_action
+        alpha = max(alpha, eval_score)  
+
 
     return best_score, best_action
 
 def strategy_nega_max_alpha_beta(
-    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 1
+    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
     """
     Strategy using the Negamax algorithm with alpha-beta pruning.
     """
     _, best_action = nega_max_alpha_beta_action(state, player, depth)
-    print(time_left)
+    #print(time_left)
     return env, best_action
 
 ### Evaluation functions
@@ -374,7 +401,7 @@ def main():
     """
     start = time.time()
     list_scores = []
-    for i in range(100):
+    for i in range(1):
         print("Partie:", i)
         list_scores.append(game_play(4, strategy_nega_max_alpha_beta, strategy_random))
 
