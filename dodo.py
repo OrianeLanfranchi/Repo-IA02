@@ -217,6 +217,25 @@ def strategy_random(
     """
     return env, random.choice(legals(Grid.state_to_grid(state), player))
 
+def isforward(action):
+    haut=action[0]
+    bas=action[1]
+    if haut[0]==bas[0]+1 and haut[1]==bas[1]+1:
+        return True
+    if bas[0]==haut[0]+1 and bas[1]==haut[1]+1:
+        return True
+
+def strategy_forward(
+    env: Grid.Environment, state: Grid.State, player: Grid.Player, _: Grid.Time
+) -> Tuple[Grid.Environment, Grid.Action]:
+    for i in legals(Grid.state_to_grid(state),player):
+        if isforward:
+            return env, i
+
+    return env, legals(Grid.state_to_grid(state),player)[0]
+
+
+
 #Evaluation
 def blockedPieces(state: Grid.State, player : Grid.Player) -> float :
     #returns number of player's pieces blocked for this turn
@@ -536,7 +555,7 @@ def main():
     list_scores = []
     for i in range(100):
         print("Partie:", i)
-        list_scores.append(game_play(4, strategy_straightforwardNega, strategy_random))
+        list_scores.append(game_play(4, strategy_forward, strategy_random))
 
     print(time.time() - start)
     print(list_scores.count(1), "/", len(list_scores))

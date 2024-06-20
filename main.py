@@ -36,7 +36,7 @@ def strategy_brain(
         print("coup joué")
         return values
 
-    values: tuple[Environment, Action] = dodo.strategy_nega_max_alpha_beta(
+    values: tuple[Environment, Action] = dodo.strategy_forward(
         env, state, player, time_left
     )
     print("coup joué")
