@@ -215,7 +215,10 @@ def strategy_random(
     """
     Random strategy for selecting an action.
     """
+
     return env, random.choice(legals(Grid.state_to_grid(state), player))
+
+
 
 def isforward(action):
     haut=action[0]
@@ -496,7 +499,7 @@ def play(state: Grid.State, player: Grid.Player, action: Grid.ActionDodo) -> Gri
     grid[coor_grid_start[0]][coor_grid_start[1]] = 0
     grid[coor_grid_end[0]][coor_grid_end[1]] = player
     return Grid.grid_to_state(grid)
-
+tableau=[]
 ### Game
 def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strategy):
     """
@@ -506,36 +509,15 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
 
     # Game structure
     state: Grid.State = Grid.grid_to_state(init_grid(real_size))
-    env_red = []
-    env_blue = []
-
-    # Best opening moves on a size 3 grid
-    squares_to_secure_red = []
-    squares_to_secure_blue = []
-
-    squares_to_secure_red.append(((-1, -1), (0, 0)))
-    squares_to_secure_red.append(
-        ((-(real_size // 2) - 1, (real_size // 2) - 1), (-(real_size // 2), real_size // 2))
-    )
-    squares_to_secure_red.append(
-        (((real_size // 2) - 1, (-(real_size // 2) - 1)), (real_size // 2, -(real_size // 2)))
-    )
-
-    squares_to_secure_blue.append(((1, 1), (0, 0)))
-    squares_to_secure_blue.append(
-        ((-(real_size // 2) + 1, (real_size // 2) + 1), (-(real_size // 2), real_size // 2))
-    )
-    squares_to_secure_blue.append(
-        (((real_size // 2) + 1, (-real_size // 2) + 1), (real_size // 2, -real_size // 2))
-    )
-
-    env_red.append(squares_to_secure_red)
-    env_blue.append(squares_to_secure_blue)
-
+    env_red = {}
+    env_red["nbcoup"]=0
+    env_blue = {}
+    x=0
     current_player = Grid.RED
     while not is_final_player(Grid.state_to_grid(state), current_player):
         if current_player == Grid.RED:
             env_red, action = strategy_red(env_red, state, current_player, time)
+            x+=1
             state = play(state, current_player, action)
             current_player = Grid.BLUE
 
@@ -543,22 +525,40 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
             env_blue, action = strategy_blue(env_blue, state, current_player, time)
             state = play(state, current_player, action)
             current_player = Grid.RED
-
+    global tableau
+    tableau.append(x)
     return score(state)
+
+def strat_mix(
+    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
+) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    env["nbcoup"]+=1
+    if env["nbcoup"]>10:
+        env,best = strategy_nega_max_alpha_beta(env, state, player, time_left, depth)
+    else :
+        env,best = strategy_forward(env, state, player, time_left)
+
+    return env,best
+    
+
+
 
 ### Main function
 def main():
+    global tableau
+
     """
     Main function to run the game simulations.
     """
     start = time.time()
     list_scores = []
-    for i in range(100):
+    for i in range(1):
         print("Partie:", i)
-        list_scores.append(game_play(4, strategy_forward, strategy_random))
+        list_scores.append(game_play(4, strat_mix, strategy_random))
 
     print(time.time() - start)
     print(list_scores.count(1), "/", len(list_scores))
-
+    tableau.sort()
+    print(tableau)
 if __name__ == "__main__":
     main()
