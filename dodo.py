@@ -176,6 +176,16 @@ def score(state: Grid.State) -> float:
         return -1
     return 0
 
+def scorePlayer(state: Grid.State,player) -> float:
+    """
+    Returns the score of the game state.
+    """
+    grid = Grid.state_to_grid(state)
+    if is_final_player(grid, player):
+        return 1
+    if is_final_player(grid, player):
+        return -1
+    return 0
 # Strategy
 def strategy_user(state: Grid.State, player: Grid.Player) -> Grid.ActionDodo:
     """
@@ -206,6 +216,110 @@ def strategy_random(
     Random strategy for selecting an action.
     """
     return env, random.choice(legals(Grid.state_to_grid(state), player))
+
+#Evaluation
+def blockedPieces(state: Grid.State, player : Grid.Player) -> float :
+    #returns number of player's pieces blocked for this turn
+    grid = Grid.state_to_grid(state)
+    legalsActions = legals(grid, player)
+
+    blockedPiecesCount = 0
+    blockedPiecesList = []
+
+    for square in state :
+        if (square[1] == player) :
+            found = False
+            for action in legalsActions :
+                if action[0] == square[0] :
+                    found = True
+                    break
+
+            if not found :
+                blockedPiecesCount += 1
+                blockedPiecesList.append(square)
+
+    return blockedPiecesCount
+
+def burriedPieces(state: Grid.State, player : Grid.Player) -> float :
+    #returns number of player's burried pieces (pieces that can't be moved anymore)
+    return 0
+
+
+#Possible optimisation : remove burried pieces (pieces surrounded by oppononet's)
+def raceTurnsLeft(state: Grid.State) -> float :
+    #Discards all opponent's pieces and counts minimum nb of turns needed to stalemate player's pieces against opponent's edge of the board
+    #allows to determine whch player is ahead in the race
+    #NOT ALWAYS THE BEST WAY TO EVALUATE THE BOARD
+    stateEvalRed = []
+    stateEvalBlue = []
+    for square in state :
+        if square[1] == 2 :
+            stateEvalRed.append((square[0], 0))
+        else :
+            stateEvalRed.append(square)
+
+        if square[1] == 1 :
+            stateEvalBlue.append((square[0], 0))
+        else :
+            stateEvalBlue.append(square)
+
+
+    raceTurnsRed = raceTurnsCount(stateEvalRed, Grid.RED)
+    raceTurnsBlue = raceTurnsCount(stateEvalBlue, Grid.BLUE)
+
+    if (raceTurnsRed < raceTurnsBlue) :
+        return 1
+    else :
+        return -1
+
+#used with raceTurnsLeft
+def raceTurnsCount(state : Grid.State, player : Grid.Player) -> int :
+    #Estimation of number of turns to place pieces against opponent's edge of the board
+    count = 0
+
+    if player == Grid.RED :
+        while(not is_final_player(Grid.state_to_grid(state), player)) :
+            hasPlayed = False
+            count += 1
+            actions = legals(Grid.state_to_grid(state), player)
+            for action in actions :
+                #going forward is statistically the better option
+                if (action[0][0] + 1 == action[1][0]) and (action[0][1] + 1 == action[1][1]) :
+                    state = play(state, player, action)
+                    hasPlayed = True
+                    break
+            if not hasPlayed :
+                state = play(state, player, random.choice(actions)) #we like to live dangerously
+
+    else :
+        while(not is_final_player(Grid.state_to_grid(state), player)) :
+            hasPlayed = False
+            count += 1
+            actions = legals(Grid.state_to_grid(state), player)
+            for action in actions :
+                #going forward is statistically the better option
+                if (action[0][0] - 1 == action[1][0]) and (action[0][1] - 1 == action[1][1]) :
+                    state = play(state, player, action)
+                    hasPlayed = True
+                    break
+            if not hasPlayed :
+                state = play(state, player, random.choice(actions)) #we lstill ike to live dangerously
+
+    return count
+
+def evaluation(state: Grid.State, player : Grid.Player) -> float :
+    if player == Grid.RED :
+        nbNumberoflegals = len(legals(state, player))
+        nbBlockedPieces = blockedPieces(state, player)
+        nbBurriedPieces = burriedPieces(state, player)
+        result = - nbNumberoflegals + nbBlockedPieces + nbBurriedPieces
+    else :
+        nbNumberoflegals = len(legals(state, player))
+        nbBlockedPieces = blockedPieces(state, player)
+        nbBurriedPieces = burriedPieces(state, player)
+        result = nbNumberoflegals - nbBlockedPieces - nbBurriedPieces
+
+    return result
 
 def evaluate(grid: Grid.Grid, player: Grid.Player) -> float:
     """
