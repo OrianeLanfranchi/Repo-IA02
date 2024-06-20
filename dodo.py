@@ -323,6 +323,25 @@ def strategy_nega_max_alpha_beta(
     #print(time_left)
     return env, best_action
 
+#Straightforward
+def strategy_straightforwardNega(
+    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
+) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    
+    actions = legals(Grid.state_to_grid(state), player)
+    best_action = None
+    direction = 1 if player == 1 else -1
+
+    for action in actions :
+        if action[0][0] + direction == action[1][0] and action[0][1] + direction == action[1][1] :
+            best_action = action
+            break
+    
+    if best_action == None :
+        _, best_action = nega_max_alpha_beta_action(state, player, depth)
+
+    return env, best_action
+
 ### Evaluation functions
 def number_of_legals(state: Grid.State, player: Grid.Player) -> float:
     """
