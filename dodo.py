@@ -561,7 +561,7 @@ def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Gr
 
 def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
     best_action = mc_simulation(state, player, iterations)
-    print(best_action)
+    #print(best_action)
     return env, best_action
 
 
