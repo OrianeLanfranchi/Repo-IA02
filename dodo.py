@@ -533,7 +533,7 @@ def strat_mix(
     env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
     env["nbcoup"]+=1
-    if env["nbcoup"]>10:
+    if env["nbcoup"]>13:
         env,best = strategy_nega_max_alpha_beta(env, state, player, time_left, depth)
     else :
         env,best = strategy_forward(env, state, player, time_left)
@@ -552,7 +552,7 @@ def main():
     """
     start = time.time()
     list_scores = []
-    for i in range(1):
+    for i in range(500):
         print("Partie:", i)
         list_scores.append(game_play(4, strat_mix, strategy_random))
 

@@ -17,11 +17,14 @@ def initialize(
         f"{game} you play {player} on a grid of size {hex_size}. Time remaining: {total_time}"
     )
     if game == "gopher":
-        env = "gopher"
+        env = {}
+        env["game"]="gopher"
         return env
     
     print('Dodo')
-    env = "dodo"
+    env = {}
+    env["game"]="dodo"
+    env["nbcoup"]=0
     return env
 
 def strategy_brain(
@@ -29,14 +32,14 @@ def strategy_brain(
 ) -> tuple[Environment, Action]:
     """fonction de stratégie"""
     print(f"Temps restant : {time_left} secondes")
-    if env == "gopher":
+    if env["game"] == "gopher":
         values: tuple[Environment, Action] = gopher_propre.strategy_nega_max_alpha_beta(
             env, state, player, time_left
         )
         print("coup joué")
         return values
 
-    values: tuple[Environment, Action] = dodo.strategy_forward(
+    values: tuple[Environment, Action] = dodo.strat_mix(
         env, state, player, time_left
     )
     print("coup joué")
