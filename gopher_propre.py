@@ -158,6 +158,7 @@ def score(state: Grid.State, current_player: Grid.Player) -> float:
     return 0
 
 
+
 def play(
     state: Grid.State, action: Grid.ActionGopher, current_player: Grid.Player
 ) -> Grid.State:
