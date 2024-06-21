@@ -493,6 +493,53 @@ def strategy_straightforwardNega(
 
     return env, best_action
 
+def strat_mix(
+    env: Grid.Environment, state: Grid.State, player: Grid.Player,
+    time_left: Grid.Time, depth: int = 6
+) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    "Go straight forward for the X first plays then use negamax to win"
+
+    env["nbcoup"]+=1
+    if env["nbcoup"]>13:
+        env,best = strategy_nega_max_alpha_beta(env, state, player, time_left, depth)
+    else :
+        env,best = strategy_forward(env, state, player, time_left)
+
+    return env,best
+
+def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Grid.ActionDodo:
+    "Monte carlo algorithme ! Best algo for now"
+    actions = legals(Grid.state_to_grid(state), player)
+    action_scores = {action: 0 for action in actions}
+
+    for action in actions:
+        for _ in range(iterations):
+            simulation = play(state, player, action)
+            current_player = player % 2 + 1
+            while not is_final_player(Grid.state_to_grid(simulation), current_player):
+                legaux = legals(Grid.state_to_grid(simulation), current_player)
+                if not legaux:
+                    break
+                random_action = random.choice(legaux)
+                simulation = play(simulation, current_player, random_action)
+                current_player = current_player % 2 + 1
+            action_scores[action] += score(simulation)
+
+    best_action = max(action_scores, key=action_scores.get)
+    # on recupere l'action qui correspond au meilleur score obtenu
+    return best_action
+
+def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player,
+    time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    "Strategy to use a monte carlo algorithme ! Best algo for now"
+
+    if type(time_left) is int and time_left<5 :
+        return env,legals(Grid.state_to_grid(state),player)[0]
+    best_action = mc_simulation(state, player, iterations)
+    print(best_action)
+    return env, best_action
+
+
 ### Evaluation functions
 def number_of_legals(state: Grid.State, player: Grid.Player) -> float:
     """
@@ -545,52 +592,6 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
     global tableau
     tableau.append(x)
     return score(state)
-
-def strat_mix(
-    env: Grid.Environment, state: Grid.State, player: Grid.Player,
-    time_left: Grid.Time, depth: int = 6
-) -> Tuple[Grid.Environment, Grid.ActionDodo]:
-    "Go straight forward for the X first plays then use negamax to win"
-
-    env["nbcoup"]+=1
-    if env["nbcoup"]>13:
-        env,best = strategy_nega_max_alpha_beta(env, state, player, time_left, depth)
-    else :
-        env,best = strategy_forward(env, state, player, time_left)
-
-    return env,best
-
-def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Grid.ActionDodo:
-    "Monte carlo algorithme ! Best algo for now"
-    actions = legals(Grid.state_to_grid(state), player)
-    action_scores = {action: 0 for action in actions}
-
-    for action in actions:
-        for _ in range(iterations):
-            simulation = play(state, player, action)
-            current_player = player % 2 + 1
-            while not is_final_player(Grid.state_to_grid(simulation), current_player):
-                legaux = legals(Grid.state_to_grid(simulation), current_player)
-                if not legaux:
-                    break
-                random_action = random.choice(legaux)
-                simulation = play(simulation, current_player, random_action)
-                current_player = current_player % 2 + 1
-            action_scores[action] += score(simulation)
-
-    best_action = max(action_scores, key=action_scores.get)
-    # on recupere l'action qui correspond au meilleur score obtenu
-    return best_action
-
-def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player,
-    time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
-    "Strategy to use a monte carlo algorithme ! Best algo for now"
-
-    if time_left<5 :
-        return env,legals(Grid.state_to_grid(state),player)[0]
-    best_action = mc_simulation(state, player, iterations)
-    #print(best_action)
-    return env, best_action
 
 
 ### Main function
