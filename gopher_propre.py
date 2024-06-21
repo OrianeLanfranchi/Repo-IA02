@@ -342,7 +342,6 @@ def strategy_nega_max_alpha_beta(
     for i in state :
         if i[1]!=0:
             _, best_action = nega_max_action_alpha_beta(state, player, depth)
-    
     return env, best_action
 
 

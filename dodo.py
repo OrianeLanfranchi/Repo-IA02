@@ -231,10 +231,6 @@ def isforward(action):
 def strategy_forward(
     env: Grid.Environment, state: Grid.State, player: Grid.Player, _: Grid.Time
 ) -> Tuple[Grid.Environment, Grid.Action]:
-    for i in legals(Grid.state_to_grid(state),player):
-        if isforward:
-            return env, i
-
     return env, legals(Grid.state_to_grid(state),player)[0]
 
 
@@ -541,6 +537,30 @@ def strat_mix(
     return env,best
     
 
+def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Grid.ActionDodo:
+    actions = legals(Grid.state_to_grid(state), player)
+    action_scores = {action: 0 for action in actions}
+    
+    for action in actions:
+        for _ in range(iterations):
+            simulation = play(state, player, action)
+            current_player = player % 2 + 1
+            while not is_final_player(Grid.state_to_grid(simulation), current_player):
+                legaux = legals(Grid.state_to_grid(simulation), current_player)
+                if not legaux:
+                    break
+                random_action = random.choice(legaux)  
+                simulation = play(simulation, current_player, random_action)
+                current_player = current_player % 2 + 1
+            action_scores[action] += score(simulation)
+
+    best_action = max(action_scores, key=action_scores.get) # on recupere l'action qui correspond au meilleur score obtenu
+    return best_action
+
+def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    best_action = mc_simulation(state, player, iterations)
+    print(best_action)
+    return env, best_action
 
 
 ### Main function
@@ -552,12 +572,13 @@ def main():
     """
     start = time.time()
     list_scores = []
-    for i in range(500):
+    for i in range(1):
         print("Partie:", i)
-        list_scores.append(game_play(4, strat_mix, strategy_random))
+        list_scores.append(game_play(4, strategy_mc, strategy_random))
 
-    print(time.time() - start)
+    print("temps total :",time.time() - start)
     print(list_scores.count(1), "/", len(list_scores))
+    print("tableau du nombre de coups joués par game")
     tableau.sort()
     print(tableau)
 if __name__ == "__main__":
