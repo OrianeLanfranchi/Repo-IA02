@@ -39,7 +39,7 @@ def strategy_brain(
         print("coup joué")
         return values
 
-    values: tuple[Environment, Action] = dodo.strat_mix(
+    values: tuple[Environment, Action] = dodo.strategy_mc(
         env, state, player, time_left
     )
     print("coup joué")
