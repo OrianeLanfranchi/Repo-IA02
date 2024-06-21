@@ -3,9 +3,9 @@
 import time
 import random
 from typing import Callable, List, Tuple, Union
+from openai import OpenAI, RateLimitError, OpenAIError
 import Grid
-import openai
-from openai import OpenAI
+
 
 
 def memoize(
@@ -232,8 +232,6 @@ def evaluate(grid: Grid.Grid, player: Grid.Player) -> float:
     opponent = player % 2 + 1
     player_legal_moves = len(legals(grid, player))
     opponent_legal_moves = len(legals(grid, opponent))
-    
-    
     return -score(Grid.grid_to_state(grid),player)*100+player_legal_moves - opponent_legal_moves
 
 
@@ -321,13 +319,11 @@ def nega_max_action_alpha_beta(
     for possible_action in list_actions:
         new_state = play(state, possible_action, player)
         eval_score = -nega_max_alpha_beta(
-            new_state, player % 2 + 1, depth - 1, -beta, -alpha  
-        )
+            new_state, player % 2 + 1, depth - 1, -beta, -alpha  )
         if eval_score > best_score:
             best_score = eval_score
             best_action = possible_action
-        alpha = max(alpha, eval_score)  
-
+        alpha = max( alpha, eval_score )
     return best_score, best_action
 
 
@@ -352,8 +348,11 @@ def strategy_random(
     """Random strategy for the player."""
     return env, random.choice(legals(Grid.state_to_grid(state), player))
 
-def demander_coup(list_actions,state,player):
-    api_key = "Your secret key"
+def demander_coup(
+        list_actions: List[Grid.ActionGopher], state:Grid.State, player:Grid.Player
+        ) -> Grid.ActionGopher:
+    """Ask to chatgpt which legal action play, using openai API ang GPT 3.5 model"""
+    api_key = "Your API key"
     client = OpenAI(api_key=api_key)
     rules ='''Here are the rules : INTRODUCTION
 Gopher is a two player game played on an initially empty, size 6 (or 8...)*
@@ -372,16 +371,21 @@ The last player to place a stone wins.'''
     try:
         response = client.chat.completions.create(model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant with extensive knowledge of gopher. "},
-            {"role": "user", "content": f'''Given the following position, you are player {player} on the board {state}, what move should I play next, here are the legals plays :{list_actions}.? Give only your choice like this format, without any additional text, or else it will break my game: (x,y)'''}
+            {"role": "system", "content": '''You are a helpful assistant
+ with extensive knowledge of gopher. '''},
+            {"role": "user", "content": f'''Given the following position, you are
+player {player} on the board {state}, what move should I play next, here are the
+legals plays :{list_actions}.? Give only your choice like this format, without any
+additional text, or else it will break my game: (x,y)'''}
         ])
         return response.choices[0].message.content
-    except openai.RateLimitError as e:
+    except RateLimitError:
         print("Rate limit exceeded. Waiting to retry...")
         time.sleep(60)  # Wait for a minute before retrying
-        return demander_coup()
-    except openai.OpenAIError as e:
+        return demander_coup(list_actions,state,player)
+    except OpenAIError as e:
         print(f"An error occurred: {e}")
+        print(rules)
         return None
 
 def startegy_chatgpt(
@@ -392,7 +396,8 @@ def startegy_chatgpt(
     choix=demander_coup(list_actions,state,player)
     choix=choix.replace("(","").replace(")","").split(",")
     choix=(int(choix[0]),int(choix[1]))
-    for i in choix : print(i)
+    for i in choix:
+        print(i)
     print(choix,type(choix))
     print(list_actions)
 
@@ -434,7 +439,7 @@ def main():
     start = time.time()
     list_scores = []
     for _ in range(1):
-        game_score = game_play(6, strategy_nega_max_alpha_beta, strategy_random)
+        game_score = game_play(4, startegy_chatgpt, strategy_random)
         list_scores.append(game_score)
         print(game_score)
     for game_score in list_scores:

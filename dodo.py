@@ -220,24 +220,35 @@ def strategy_random(
 
 
 
-def isforward(action):
+def isforward(action:Grid.ActionDodo)->bool:
+    "check if an action try to go forward, to the top or bottom"
     haut=action[0]
     bas=action[1]
     if haut[0]==bas[0]+1 and haut[1]==bas[1]+1:
         return True
     if bas[0]==haut[0]+1 and bas[1]==haut[1]+1:
         return True
+    return False
 
 def strategy_forward(
     env: Grid.Environment, state: Grid.State, player: Grid.Player, _: Grid.Time
 ) -> Tuple[Grid.Environment, Grid.Action]:
+    """"A strategy where you only try to go straight forward quicker
+    The idea is to play forward the X fists plays and later to switch for a 
+    time consuming strategy
+    you're not supposed to loose the game against a player who don't try to block you
+    we ran over 1000 simulation to see that the shortest game are about 13 plays and the longest 70
+    """
+    for i in legals(Grid.state_to_grid(state),player):
+        if isforward(i):
+            return env,i
     return env, legals(Grid.state_to_grid(state),player)[0]
 
 
 
 #Evaluation
 def blockedPieces(state: Grid.State, player : Grid.Player) -> float :
-    #returns number of player's pieces blocked for this turn
+    """#returns number of player's pieces blocked for this turn"""
     grid = Grid.state_to_grid(state)
     legalsActions = legals(grid, player)
 
@@ -245,7 +256,7 @@ def blockedPieces(state: Grid.State, player : Grid.Player) -> float :
     blockedPiecesList = []
 
     for square in state :
-        if (square[1] == player) :
+        if square[1] == player :
             found = False
             for action in legalsActions :
                 if action[0] == square[0] :
@@ -259,15 +270,17 @@ def blockedPieces(state: Grid.State, player : Grid.Player) -> float :
     return blockedPiecesCount
 
 def burriedPieces(state: Grid.State, player : Grid.Player) -> float :
-    #returns number of player's burried pieces (pieces that can't be moved anymore)
+    """#returns number of player's burried pieces (pieces that can't be moved anymore)"""
+    print(f"{state}{player}")
     return 0
 
 
 #Possible optimisation : remove burried pieces (pieces surrounded by oppononet's)
 def raceTurnsLeft(state: Grid.State) -> float :
-    #Discards all opponent's pieces and counts minimum nb of turns needed to stalemate player's pieces against opponent's edge of the board
+    """#Discards all opponent's pieces and counts minimum nb of turns needed to
+    #stalemate player's pieces against opponent's edge of the board
     #allows to determine whch player is ahead in the race
-    #NOT ALWAYS THE BEST WAY TO EVALUATE THE BOARD
+    #NOT ALWAYS THE BEST WAY TO EVALUATE THE BOARD"""
     stateEvalRed = []
     stateEvalBlue = []
     for square in state :
@@ -285,14 +298,13 @@ def raceTurnsLeft(state: Grid.State) -> float :
     raceTurnsRed = raceTurnsCount(stateEvalRed, Grid.RED)
     raceTurnsBlue = raceTurnsCount(stateEvalBlue, Grid.BLUE)
 
-    if (raceTurnsRed < raceTurnsBlue) :
+    if raceTurnsRed < raceTurnsBlue :
         return 1
-    else :
-        return -1
+    return -1
 
 #used with raceTurnsLeft
 def raceTurnsCount(state : Grid.State, player : Grid.Player) -> int :
-    #Estimation of number of turns to place pieces against opponent's edge of the board
+    "Estimation of number of turns to place pieces against opponent's edge of the board"
     count = 0
 
     if player == Grid.RED :
@@ -321,11 +333,13 @@ def raceTurnsCount(state : Grid.State, player : Grid.Player) -> int :
                     hasPlayed = True
                     break
             if not hasPlayed :
-                state = play(state, player, random.choice(actions)) #we lstill ike to live dangerously
+                state = play(state, player, random.choice(actions))
+                #we still ike to live dangerously
 
     return count
 
 def evaluation(state: Grid.State, player : Grid.Player) -> float :
+    "an attempt for a smarter evaluation function"
     if player == Grid.RED :
         nbNumberoflegals = len(legals(state, player))
         nbBlockedPieces = blockedPieces(state, player)
@@ -394,7 +408,7 @@ def strategy_nega_max(
     Strategy using the Negamax algorithm.
     """
     _, best_action = nega_max_action(state, player, depth)
-    return "dodo", best_action
+    return env, best_action
 
 # Negamax pruning
 def nega_max_alpha_beta(
@@ -435,31 +449,37 @@ def nega_max_alpha_beta_action(
     for possible_action in list_actions:
         new_state = play(state, player, possible_action)
         eval_score = -nega_max_alpha_beta(
-            new_state, player % 2 + 1, depth - 1, -beta, -alpha  
+            new_state, player % 2 + 1, depth - 1, -beta, -alpha
         )
         if eval_score > best_score:
             best_score = eval_score
             best_action = possible_action
-        alpha = max(alpha, eval_score)  
+        alpha = max(alpha, eval_score)
 
 
     return best_score, best_action
 
 def strategy_nega_max_alpha_beta(
-    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
+    env: Grid.Environment, state: Grid.State, player: Grid.Player,
+    time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
     """
     Strategy using the Negamax algorithm with alpha-beta pruning.
     """
+    if time_left<5:
+        return env,legals(Grid.state_to_grid(state),player)[0]
     _, best_action = nega_max_alpha_beta_action(state, player, depth)
     #print(time_left)
     return env, best_action
 
 #Straightforward
 def strategy_straightforwardNega(
-    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
+    env: Grid.Environment, state: Grid.State, player: Grid.Player,
+    time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
-    
+    "Go straight forward for the X first plays then use negamax to win"
+    if time_left<5:
+        return env,legals(Grid.state_to_grid(state),player)[0]
     actions = legals(Grid.state_to_grid(state), player)
     best_action = None
     direction = 1 if player == 1 else -1
@@ -468,8 +488,7 @@ def strategy_straightforwardNega(
         if action[0][0] + direction == action[1][0] and action[0][1] + direction == action[1][1] :
             best_action = action
             break
-    
-    if best_action == None :
+    if best_action is None :
         _, best_action = nega_max_alpha_beta_action(state, player, depth)
 
     return env, best_action
@@ -528,8 +547,11 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
     return score(state)
 
 def strat_mix(
-    env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, depth: int = 6
+    env: Grid.Environment, state: Grid.State, player: Grid.Player,
+    time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    "Go straight forward for the X first plays then use negamax to win"
+
     env["nbcoup"]+=1
     if env["nbcoup"]>13:
         env,best = strategy_nega_max_alpha_beta(env, state, player, time_left, depth)
@@ -537,12 +559,12 @@ def strat_mix(
         env,best = strategy_forward(env, state, player, time_left)
 
     return env,best
-    
 
 def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Grid.ActionDodo:
+    "Monte carlo algorithme ! Best algo for now"
     actions = legals(Grid.state_to_grid(state), player)
     action_scores = {action: 0 for action in actions}
-    
+
     for action in actions:
         for _ in range(iterations):
             simulation = play(state, player, action)
@@ -551,15 +573,21 @@ def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Gr
                 legaux = legals(Grid.state_to_grid(simulation), current_player)
                 if not legaux:
                     break
-                random_action = random.choice(legaux)  
+                random_action = random.choice(legaux)
                 simulation = play(simulation, current_player, random_action)
                 current_player = current_player % 2 + 1
             action_scores[action] += score(simulation)
 
-    best_action = max(action_scores, key=action_scores.get) # on recupere l'action qui correspond au meilleur score obtenu
+    best_action = max(action_scores, key=action_scores.get)
+    # on recupere l'action qui correspond au meilleur score obtenu
     return best_action
 
-def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player, time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player,
+    time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
+    "Strategy to use a monte carlo algorithme ! Best algo for now"
+
+    if time_left<5 :
+        return env,legals(Grid.state_to_grid(state),player)[0]
     best_action = mc_simulation(state, player, iterations)
     #print(best_action)
     return env, best_action
@@ -567,11 +595,11 @@ def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player, t
 
 ### Main function
 def main():
-    global tableau
-
     """
     Main function to run the game simulations.
     """
+    global tableau
+
     start = time.time()
     list_scores = []
     for i in range(10):
