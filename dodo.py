@@ -493,7 +493,7 @@ def strategy_straightforwardNega(
 
     return env, best_action
 
-def strat_mix(
+def strategy_mix(
     env: Grid.Environment, state: Grid.State, player: Grid.Player,
     time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
