@@ -529,7 +529,7 @@ def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Gr
     else : 
         best_action = min(action_scores, key=action_scores.get)
 
-    print(action_scores[best_action]/100)
+    print(action_scores[best_action]/100) # taux de victoire du joueur 1 à chaque itération
 
     # on recupere l'action qui correspond au meilleur score obtenu
     return best_action
@@ -566,7 +566,6 @@ def play(state: Grid.State, player: Grid.Player, action: Grid.ActionDodo) -> Gri
     grid[coor_grid_start[0]][coor_grid_start[1]] = 0
     grid[coor_grid_end[0]][coor_grid_end[1]] = player
     return Grid.grid_to_state(grid)
-tableau=[]
 ### Game
 def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strategy) -> float:
     """
@@ -580,13 +579,10 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
     env_red["nbcoup"]=0
     env_blue = {}
     env_blue["nbcoup"]=0
-
-    x=0
     current_player = Grid.RED
     while not is_final_player(Grid.state_to_grid(state), current_player):
         if current_player == Grid.RED:
             env_red, action = strategy_red(env_red, state, current_player, time)
-            x+=1
             state = play(state, current_player, action)
             current_player = Grid.BLUE
 
@@ -594,8 +590,7 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
             env_blue, action = strategy_blue(env_blue, state, current_player, time)
             state = play(state, current_player, action)
             current_player = Grid.RED
-    global tableau
-    tableau.append(x)
+
     return score(state)
 
 
@@ -604,7 +599,6 @@ def main():
     """
     Main function to run the game simulations.
     """
-    global tableau
 
     print(game_play(4, strategy_mc,strategy_random))
 
