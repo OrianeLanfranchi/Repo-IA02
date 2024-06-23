@@ -265,6 +265,13 @@ Voilà une clé d'API avec des crédits, à remplacer dans la chaine "Your API k
 "XXXXX"
 Merci de ne pas la partager en dehors du cours d'IA02 et de ne pas en faire une utilisation excessive.
 
+
+Pour accéder à la librairie openai, veuillez exécuter la commande :
+````
+pip install openai
+````
+
+
 ## Stratégies Dodo
  Une liste non-exhaustive des stratégies mises en place pour dodo. Nous avons choisi de faire paraître uniquement les stratégies que nous avons jugées les plus intéressantes. (Un Ctrl+F dans le fichier dodo.py, en recherchant "strategy" permet de trouver toutes les stratégies présentes dans le fichier)
 
