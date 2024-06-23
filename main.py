@@ -4,7 +4,7 @@ import argparse
 from typing import Dict, Any
 from gndclient import start, Action, Score, Player, State, Time, DODO_STR, GOPHER_STR
 import dodo
-import gopher_propre
+import gopher
 Environment = Dict[str, Any]
 
 
@@ -33,7 +33,7 @@ def strategy_brain(
     """fonction de stratégie"""
     print(f"Temps restant : {time_left} secondes")
     if env["game"] == "gopher":
-        values: tuple[Environment, Action] = gopher_propre.strategy_nega_max_alpha_beta(
+        values: tuple[Environment, Action] = gopher.strategy_nega_max_alpha_beta(
             env, state, player, time_left
         )
         print("coup joué")
