@@ -602,8 +602,6 @@ def main():
 
     print(game_play(4, strategy_mc,strategy_random))
 
-    print(tableau)
-
 
 if __name__ == "__main__":
     main()
