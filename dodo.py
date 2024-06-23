@@ -524,8 +524,13 @@ def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Gr
                 simulation = play(simulation, current_player, random_action)
                 current_player = current_player % 2 + 1
             action_scores[action] += score(simulation)
+    if player==1:
+        best_action = max(action_scores, key=action_scores.get)
+    else : 
+        best_action = min(action_scores, key=action_scores.get)
 
-    best_action = max(action_scores, key=action_scores.get)
+    print(action_scores[best_action]/100)
+
     # on recupere l'action qui correspond au meilleur score obtenu
     return best_action
 

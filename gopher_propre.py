@@ -331,14 +331,17 @@ def strategy_nega_max_alpha_beta(
     env: Grid.Environment,
     state: Grid.State,
     player: Grid.Player,
-    _: Grid.Time,
+    time_left: Grid.Time,
     depth: int = 4,
 ) -> Tuple[Grid.Environment, Grid.ActionGopher]:
     """Negamax strategy with alpha-beta pruning for the player."""
     best_action=(0,5)
+    if type(time_left) is int and time_left<5 :
+        return env,legals(Grid.state_to_grid(state),player)[0]
     for i in state :
         if i[1]!=0:
             _, best_action = nega_max_action_alpha_beta(state, player, depth)
+    print(best_action)
     return env, best_action
 
 
@@ -439,7 +442,7 @@ def main():
     start = time.time()
     list_scores = []
     for _ in range(1):
-        game_score = game_play(4, startegy_chatgpt, strategy_random)
+        game_score = game_play(4, strategy_nega_max_alpha_beta, strategy_random)
         list_scores.append(game_score)
         print(game_score)
     for game_score in list_scores:
