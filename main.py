@@ -9,7 +9,7 @@ Environment = Dict[str, Any]
 
 
 def initialize(
-    game: str, state: State, player: Player, hex_size: int, total_time: Time
+    game: str, _: State, player: Player, hex_size: int, total_time: Time
 ) -> Environment:
     """initialise l'environnement"""
     print("Init")
@@ -20,7 +20,6 @@ def initialize(
         env = {}
         env["game"]="gopher"
         return env
-    
     print('Dodo')
     env = {}
     env["game"]="dodo"
@@ -43,10 +42,9 @@ def strategy_brain(
         env, state, player, time_left
     )
     print("coup joué")
-
     return values
 
-def final_result(state: State, score: Score, player: Player):
+def final_result(_: State, score: Score, player: Player):
     """affichage du gagnant"""
     print(f"Ending: {player} wins with a score of {score}")
 

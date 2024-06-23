@@ -176,7 +176,7 @@ def score(state: Grid.State) -> float:
         return -1
     return 0
 
-def scorePlayer(state: Grid.State,player) -> float:
+def score_player(state: Grid.State,player) -> float:
     """
     Returns the score of the game state.
     """
@@ -197,7 +197,7 @@ def strategy_user(state: Grid.State, player: Grid.Player) -> Grid.ActionDodo:
     print("Player:", player, "\nAvailable actions:")
     for action in actions:
         print(action)
-
+    player_action=actions[0]
     while not selection:
         row_start = int(input("Choose a row (start): "))
         col_start = int(input("Choose a col (start): "))
@@ -247,92 +247,92 @@ def strategy_forward(
 
 
 #Evaluation
-def blockedPieces(state: Grid.State, player : Grid.Player) -> float :
+def blocked_pieces(state: Grid.State, player : Grid.Player) -> float :
     """#returns number of player's pieces blocked for this turn"""
     grid = Grid.state_to_grid(state)
-    legalsActions = legals(grid, player)
+    legals_actions = legals(grid, player)
 
-    blockedPiecesCount = 0
-    blockedPiecesList = []
+    blocked_pieces_count = 0
+    blocked_pieces_list = []
 
     for square in state :
         if square[1] == player :
             found = False
-            for action in legalsActions :
+            for action in legals_actions :
                 if action[0] == square[0] :
                     found = True
                     break
 
             if not found :
-                blockedPiecesCount += 1
-                blockedPiecesList.append(square)
+                blocked_pieces_count += 1
+                blocked_pieces_list.append(square)
 
-    return blockedPiecesCount
+    return blocked_pieces_count
 
-def burriedPieces(state: Grid.State, player : Grid.Player) -> float :
+def burried_pieces(state: Grid.State, player : Grid.Player) -> float :
     """#returns number of player's burried pieces (pieces that can't be moved anymore)"""
     print(f"{state}{player}")
     return 0
 
 
 #Possible optimisation : remove burried pieces (pieces surrounded by oppononet's)
-def raceTurnsLeft(state: Grid.State) -> float :
+def race_turns_left(state: Grid.State) -> float :
     """#Discards all opponent's pieces and counts minimum nb of turns needed to
     #stalemate player's pieces against opponent's edge of the board
     #allows to determine whch player is ahead in the race
     #NOT ALWAYS THE BEST WAY TO EVALUATE THE BOARD"""
-    stateEvalRed = []
-    stateEvalBlue = []
+    state_eval_red = []
+    state_eval_blue = []
     for square in state :
         if square[1] == 2 :
-            stateEvalRed.append((square[0], 0))
+            state_eval_red.append((square[0], 0))
         else :
-            stateEvalRed.append(square)
+            state_eval_red.append(square)
 
         if square[1] == 1 :
-            stateEvalBlue.append((square[0], 0))
+            state_eval_blue.append((square[0], 0))
         else :
-            stateEvalBlue.append(square)
+            state_eval_blue.append(square)
 
 
-    raceTurnsRed = raceTurnsCount(stateEvalRed, Grid.RED)
-    raceTurnsBlue = raceTurnsCount(stateEvalBlue, Grid.BLUE)
+    race_turns_red = race_turns_count(state_eval_red, Grid.RED)
+    race_turns_blue = race_turns_count(state_eval_blue, Grid.BLUE)
 
-    if raceTurnsRed < raceTurnsBlue :
+    if race_turns_red < race_turns_blue :
         return 1
     return -1
 
-#used with raceTurnsLeft
-def raceTurnsCount(state : Grid.State, player : Grid.Player) -> int :
+#used with race_turns_left
+def race_turns_count(state : Grid.State, player : Grid.Player) -> int :
     "Estimation of number of turns to place pieces against opponent's edge of the board"
     count = 0
 
     if player == Grid.RED :
         while(not is_final_player(Grid.state_to_grid(state), player)) :
-            hasPlayed = False
+            has_played = False
             count += 1
             actions = legals(Grid.state_to_grid(state), player)
             for action in actions :
                 #going forward is statistically the better option
                 if (action[0][0] + 1 == action[1][0]) and (action[0][1] + 1 == action[1][1]) :
                     state = play(state, player, action)
-                    hasPlayed = True
+                    has_played = True
                     break
-            if not hasPlayed :
+            if not has_played :
                 state = play(state, player, random.choice(actions)) #we like to live dangerously
 
     else :
         while(not is_final_player(Grid.state_to_grid(state), player)) :
-            hasPlayed = False
+            has_played = False
             count += 1
             actions = legals(Grid.state_to_grid(state), player)
             for action in actions :
                 #going forward is statistically the better option
                 if (action[0][0] - 1 == action[1][0]) and (action[0][1] - 1 == action[1][1]) :
                     state = play(state, player, action)
-                    hasPlayed = True
+                    has_played = True
                     break
-            if not hasPlayed :
+            if not has_played :
                 state = play(state, player, random.choice(actions))
                 #we still ike to live dangerously
 
@@ -341,15 +341,15 @@ def raceTurnsCount(state : Grid.State, player : Grid.Player) -> int :
 def evaluation(state: Grid.State, player : Grid.Player) -> float :
     "an attempt for a smarter evaluation function"
     if player == Grid.RED :
-        nbNumberoflegals = len(legals(state, player))
-        nbBlockedPieces = blockedPieces(state, player)
-        nbBurriedPieces = burriedPieces(state, player)
-        result = - nbNumberoflegals + nbBlockedPieces + nbBurriedPieces
+        nb_number_of_legals = len(legals(state, player))
+        nbblocked_pieces = blocked_pieces(state, player)
+        nbburried_pieces = burried_pieces(state, player)
+        result = - nb_number_of_legals + nbblocked_pieces + nbburried_pieces
     else :
-        nbNumberoflegals = len(legals(state, player))
-        nbBlockedPieces = blockedPieces(state, player)
-        nbBurriedPieces = burriedPieces(state, player)
-        result = nbNumberoflegals - nbBlockedPieces - nbBurriedPieces
+        nb_number_of_legals = len(legals(state, player))
+        nbblocked_pieces = blocked_pieces(state, player)
+        nbburried_pieces = burried_pieces(state, player)
+        result = nb_number_of_legals - nbblocked_pieces - nbburried_pieces
 
     return result
 
@@ -473,7 +473,7 @@ def strategy_nega_max_alpha_beta(
     return env, best_action
 
 #Straightforward
-def strategy_straightforwardNega(
+def strategy_straightforward_nega(
     env: Grid.Environment, state: Grid.State, player: Grid.Player,
     time_left: Grid.Time, depth: int = 6
 ) -> Tuple[Grid.Environment, Grid.ActionDodo]:
@@ -526,7 +526,7 @@ def mc_simulation(state: Grid.State, player: Grid.Player, iterations: int) -> Gr
             action_scores[action] += score(simulation)
     if player==1:
         best_action = max(action_scores, key=action_scores.get)
-    else : 
+    else :
         best_action = min(action_scores, key=action_scores.get)
 
     print(action_scores[best_action]/100) # taux de victoire du joueur 1 à chaque itération
@@ -538,7 +538,7 @@ def strategy_mc(env: Grid.Environment, state: Grid.State, player: Grid.Player,
     time_left: Grid.Time, iterations: int = 100) -> Tuple[Grid.Environment, Grid.ActionDodo]:
     "Strategy to use a monte carlo algorithme ! Best algo for now"
 
-    if type(time_left) is int and time_left<5 :
+    if isinstance(time_left,int) and time_left<5 :
         return env,legals(Grid.state_to_grid(state),player)[0]
     best_action = mc_simulation(state, player, iterations)
     print(best_action)

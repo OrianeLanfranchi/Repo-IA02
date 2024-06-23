@@ -336,7 +336,7 @@ def strategy_nega_max_alpha_beta(
 ) -> Tuple[Grid.Environment, Grid.ActionGopher]:
     """Negamax strategy with alpha-beta pruning for the player."""
     best_action=(0,5)
-    if type(time_left) is int and time_left<5 :
+    if isinstance(time_left,int) and time_left<5 :
         return env,legals(Grid.state_to_grid(state),player)[0]
     for i in state :
         if i[1]!=0:
@@ -439,7 +439,7 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
 
 def main():
     """Main function to run the game simulations."""
-    
+
     print(game_play(4, strategy_nega_max_alpha_beta, strategy_random))
 
 
