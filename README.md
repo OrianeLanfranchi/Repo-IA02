@@ -262,15 +262,13 @@ Perspectives :
 
 Il faut garder en tête que l'API est payante ; le coût à la requête étant marginal, nous vous invitons à l'essayer, mais merci de limiter la taille des grilles à 6.
 Voilà une clé d'API avec des crédits, à remplacer dans la chaine "Your API key" :
-"XXXXX"
+"XXX"
 Merci de ne pas la partager en dehors du cours d'IA02 et de ne pas en faire une utilisation excessive.
-
 
 Pour accéder à la librairie openai, veuillez exécuter la commande :
 ````
 pip install openai
 ````
-
 
 ## Stratégies Dodo
  Une liste non-exhaustive des stratégies mises en place pour dodo. Nous avons choisi de faire paraître uniquement les stratégies que nous avons jugées les plus intéressantes. (Un Ctrl+F dans le fichier dodo.py, en recherchant "strategy" permet de trouver toutes les stratégies présentes dans le fichier)
@@ -322,3 +320,7 @@ dodo.strategy_nega_max
 ````
 
 Il s'agit de l'ancêtre de la stratégie précédente, sans élagage alpha-bêta. La recherche de coup optimal s'effectue en profondeur finie (par défaut, 3), avec une fonction d'évaluation jaugeant le plateau en comparant le nombre de coups des deux joueurs.
+
+# Conclusion
+
+Nous avons largement apprécié le projet proposé. La possibilité de travailler sur deux jeux différents nous a permis d'explorer différentes stratégies et algorithmes afin de déterminer le coup optimal pour un joueur donné, dans une situation donné. Nous avons tous deux pris plaisir à effectuer ce projet, particulièrement grâce l'interactivité qu'il proposait. Celle-ci nous a permis de jouer contre d'autres binômes, ce qui nous a poussé à nous améliorer mutuellement en organisant des compétitions (plus ou moins) amicales, nous permettant de calibrer nos algorithmes, en remarquant les stratégies fonctionnant mieux que d'autres.
