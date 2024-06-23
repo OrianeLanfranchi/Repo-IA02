@@ -568,7 +568,7 @@ def play(state: Grid.State, player: Grid.Player, action: Grid.ActionDodo) -> Gri
     return Grid.grid_to_state(grid)
 tableau=[]
 ### Game
-def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strategy):
+def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strategy) -> float:
     """
     Simulate a game play between two strategies.
     """
@@ -606,16 +606,10 @@ def main():
     """
     global tableau
 
-    start = time.time()
-    list_scores = []
-    for i in range(10):
-        print("Partie:", i)
-        list_scores.append(game_play(4, strategy_mc,strategy_random))
+    print(game_play(4, strategy_mc,strategy_random))
 
-    print("temps total :",time.time() - start)
-    print(list_scores.count(1), "/", len(list_scores))
-    print("tableau du nombre de coups joués par game")
-    tableau.sort()
     print(tableau)
+
+
 if __name__ == "__main__":
     main()

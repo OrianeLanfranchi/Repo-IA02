@@ -439,18 +439,8 @@ def game_play(size: int, strategy_red: Grid.Strategy, strategy_blue: Grid.Strate
 
 def main():
     """Main function to run the game simulations."""
-    start = time.time()
-    list_scores = []
-    for _ in range(1):
-        game_score = game_play(4, strategy_nega_max_alpha_beta, strategy_random)
-        list_scores.append(game_score)
-        print(game_score)
-    for game_score in list_scores:
-        print(game_score,"c'est le gagnant", end=" ", )
-    print()
-    print(time.time() - start)
-
-    print(list_scores.count(1), "/", len(list_scores))
+    
+    print(game_play(4, strategy_nega_max_alpha_beta, strategy_random))
 
 
 if __name__ == "__main__":
