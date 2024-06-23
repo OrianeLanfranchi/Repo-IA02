@@ -391,7 +391,7 @@ additional text, or else it will break my game: (x,y)'''}
         print(rules)
         return None
 
-def startegy_chatgpt(
+def strategy_chatgpt(
     env: Grid.Environment, state: Grid.State, player: Grid.Player, _: Grid.Time
 )-> Tuple[Grid.Environment, Grid.ActionGopher]:
     """Playing using openai API for chatgpt"""
